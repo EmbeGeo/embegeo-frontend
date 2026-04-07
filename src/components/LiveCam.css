@@ -1,0 +1,60 @@
+/* src/components/LiveCam.css */
+
+.live-cam-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #d9ebff;
+  border: 4px solid #0f2d66;
+  border-radius: 18px;
+  padding: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+.camera-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  color: #0f2d66;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.camera-icon {
+  font-size: 38px;
+}
+
+.camera-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border: 4px solid #0f2d66;
+  border-radius: 16px;
+  background: #f5f8ff;
+}
+
+.info-boxes {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.info-box {
+  flex: 1;
+  background: white;
+  border: 4px solid #0f2d66;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 80px;
+}
+
+.info-label {
+  font-weight: 700;
+  font-size: 16px;
+  color: #111;
+}
