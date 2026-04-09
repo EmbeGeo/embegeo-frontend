@@ -49,6 +49,12 @@
   gap: 8px;
 }
 
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 .nav-btn:hover {
   color: #0f2d66;
 }
