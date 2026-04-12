@@ -1,12 +1,13 @@
 /* src/components/LiveCam.jsx */
 
 import './LiveCam.css'
+import liveCamScreenImage from '../assets/live_cam_screen.png'
 
 export default function LiveCam() {
   return (
     <div className="live-cam-section">
       <div className="camera-title">
-        <span className="camera-icon">📷</span>
+        <img src={liveCamScreenImage} alt="Live Camera Icon" className="camera-icon-image" />
         <h2>Live Cam Screen</h2>
       </div>
 
