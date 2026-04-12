@@ -5,13 +5,13 @@ import './Header.css'
 import databaseIcon from '../assets/database.png'
 import graphIcon from '../assets/graph.png'
 import homeIcon from '../assets/home.png'
+import easyGeoLogo from '../assets/easyGeo.png'
 
 export default function Header() {
   return (
     <header className="header">
       <div className="logo">
-        <span className="logo-icon">◆</span>
-        <span className="logo-text">Easy<span className="logo-gray">Geo</span></span>
+        <img src={easyGeoLogo} alt="EasyGeo Logo" className="logo-image" />
       </div>
       <nav className="nav">
         <button className="nav-btn">

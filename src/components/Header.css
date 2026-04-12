@@ -17,6 +17,11 @@
   gap: 12px;
 }
 
+.logo-image {
+  height: 40px; /* Adjust as needed */
+  width: auto;
+}
+
 .logo-icon {
   font-size: 32px;
   color: #0f2d66;

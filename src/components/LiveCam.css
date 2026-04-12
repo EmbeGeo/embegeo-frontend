@@ -22,8 +22,10 @@
   font-weight: 800;
 }
 
-.camera-icon {
-  font-size: 38px;
+.camera-icon-image {
+  width: 38px; /* Match the previous font-size */
+  height: 38px; /* Match the previous font-size */
+  object-fit: contain;
 }
 
 .camera-image {
