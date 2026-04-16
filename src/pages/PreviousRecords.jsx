@@ -6,27 +6,44 @@ import { recordsAPI } from '../services/api'
 import DateTimeModal from '../components/DateTimeModal'
 
 export default function PreviousRecords() {
+
+  const [selectedYear, setSelectedYear] = useState('')
+  const [selectedMonth, setSelectedMonth] = useState('')
+  const [selectedDay, setSelectedDay] = useState('')
+  const [selectedHour, setSelectedHour] = useState('')
+  const [selectedMinute, setSelectedMinute] = useState('')
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedYear, setSelectedYear] = useState('2026')
-  const [selectedMonth, setSelectedMonth] = useState('04')
-  const [selectedDay, setSelectedDay] = useState('10')
-  const [selectedHour, setSelectedHour] = useState('00')
-  const [selectedMinute, setSelectedMinute] = useState('00')
   const [filteredRecords, setFilteredRecords] = useState([])
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // 초기 데이터 로드
+  // 현재 시간으로 초기화 (마운트 시에만 한 번)
   useEffect(() => {
-    fetchRecords()
+    const now = new Date()
+    const year = now.getFullYear().toString()
+    const month = (now.getMonth() + 1).toString().padStart(2, '0')
+    const day = now.getDate().toString().padStart(2, '0')
+    const hour = now.getHours().toString().padStart(2, '0')
+    const minute = now.getMinutes().toString().padStart(2, '0')
+    
+    setSelectedYear(year)
+    setSelectedMonth(month)
+    setSelectedDay(day)
+    setSelectedHour(hour)
+    setSelectedMinute(minute)
   }, [])
 
-  // 날짜/시간 또는 검색 조건 변경 시 필터링
+  // 초기 데이터 로드
+  useEffect(() => {
+    if (selectedYear) {
+      fetchRecords()
+    }
+  }, [selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute])
+
   useEffect(() => {
     applyFilters()
-  }, [records, selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute, searchQuery])
+  }, [records, selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute])
 
   const fetchRecords = async () => {
     setLoading(true)
@@ -62,24 +79,7 @@ export default function PreviousRecords() {
       })
     }
 
-    // 검색 쿼리 필터링
-    if (searchQuery.trim()) {
-      filtered = filtered.filter((record) => {
-        if (!record) return false
-        const query = searchQuery.toLowerCase()
-        return (
-          record.title?.toLowerCase().includes(query) ||
-          record.description?.toLowerCase().includes(query) ||
-          record.location?.toLowerCase().includes(query)
-        )
-      })
-    }
-
     setFilteredRecords(filtered)
-  }
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
   }
 
   const handleRefresh = () => {
@@ -87,6 +87,12 @@ export default function PreviousRecords() {
   }
 
   const handleOpenModal = () => {
+    const now = new Date()
+    setSelectedYear(now.getFullYear().toString())
+    setSelectedMonth((now.getMonth() + 1).toString().padStart(2, '0'))
+    setSelectedDay(now.getDate().toString().padStart(2, '0'))
+    setSelectedHour(now.getHours().toString().padStart(2, '0'))
+    setSelectedMinute(now.getMinutes().toString().padStart(2, '0'))
     setIsModalOpen(true)
   }
 
@@ -100,51 +106,39 @@ export default function PreviousRecords() {
     setSelectedDay(dateTime.day)
     setSelectedHour(dateTime.hour)
     setSelectedMinute(dateTime.minute)
+    setIsModalOpen(false)
   }
 
   return (
     <main className="previous-records-container">
-      <div className="records-header">
-        <h2>이전 기록</h2>
-      </div>
-
-      <div className="controls-section">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="검색"
-            className="search-input"
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
+      <div className="records-header-row">
+        <div className="records-header">
+          <h2>이전 기록</h2>
         </div>
-
-        <div className="datetime-picker-section">
-          <button
-            className="datetime-select-btn"
-            onClick={handleOpenModal}
-          >
-            {selectedYear}년 {selectedMonth}월 {selectedDay}일 {selectedHour}시 {selectedMinute}분
+        <div className="header-actions">
+          <button className="search-open-btn" onClick={handleOpenModal}>
+            시간 조회
+          </button>
+          <button className="refresh-btn" onClick={handleRefresh}>
+            새로고침
           </button>
         </div>
-
-        <button className="refresh-btn" onClick={handleRefresh}>
-          새로고침
-        </button>
       </div>
 
-      <DateTimeModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleDateTimeConfirm}
-        initialDateTime={{
-          year: selectedYear,
-          month: selectedMonth,
-          day: selectedDay,
-          hour: selectedHour,
-          minute: selectedMinute
-        }}
-      />
+      {isModalOpen && (
+        <DateTimeModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onConfirm={handleDateTimeConfirm}
+          initialDateTime={{
+            year: selectedYear,
+            month: selectedMonth,
+            day: selectedDay,
+            hour: selectedHour,
+            minute: selectedMinute,
+          }}
+        />
+      )}
 
       {error && (
         <div className="error-message">

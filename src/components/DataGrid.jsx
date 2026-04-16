@@ -1,9 +1,19 @@
 /* src/components/DataGrid.jsx */
 
+import { useState, useEffect } from 'react'
 import './DataGrid.css'
 
 export default function DataGrid() {
   const data = Array(14).fill(null)
+  const [currentDate, setCurrentDate] = useState('')
+
+  useEffect(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    setCurrentDate(`${year}년 ${month}월 ${day}일`)
+  }, [])
 
   return (
     <div className="data-grid-section">
@@ -12,7 +22,7 @@ export default function DataGrid() {
       </div>
 
       <div className="date-display">
-        <span>2026-04-10</span>
+        <span>{currentDate}</span>
       </div>
 
       <div className="grid-container">

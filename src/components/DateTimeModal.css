@@ -117,6 +117,18 @@
   border-radius: 12px;
   background: #f8fbff;
   position: relative;
+  user-select: none;
+  cursor: grab;
+  transition: cursor 0.1s;
+}
+
+.wheel-container:active {
+  cursor: grabbing;
+}
+
+.wheel-container.dragging {
+  scroll-behavior: auto;
+  cursor: grabbing;
 }
 
 .wheel-container::before,
@@ -142,7 +154,8 @@
 }
 
 .wheel-list {
-  padding: 80px 0; /* 위아래 여백으로 가운데 선택 영역 확보 */
+  display: flex;
+  flex-direction: column;
 }
 
 .wheel-item {

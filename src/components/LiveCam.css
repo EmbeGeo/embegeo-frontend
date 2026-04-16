@@ -50,13 +50,26 @@
   border-radius: 16px;
   padding: 18px;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
   min-height: 80px;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 .info-label {
   font-weight: 700;
-  font-size: 16px;
-  color: #111;
+  font-size: 14px;
+  color: #666;
+}
+
+.info-value {
+  font-weight: 800;
+  font-size: 18px;
+  color: #0f2d66;
 }
