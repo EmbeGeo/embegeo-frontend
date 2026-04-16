@@ -85,6 +85,43 @@
   box-shadow: 0 0 0 3px rgba(15, 45, 102, 0.2);
 }
 
+.datetime-picker-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.datetime-select-btn {
+  background: #b3c9ef;
+  border: 3px solid #0f2d66;
+  border-radius: 12px;
+  padding: 8px 16px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #0f2d66;
+  cursor: pointer;
+  outline: none;
+  min-width: 200px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.datetime-select-btn:hover {
+  background: #a3b7d7;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(15, 45, 102, 0.2);
+}
+
+.datetime-select-btn:focus {
+  box-shadow: 0 0 0 3px rgba(15, 45, 102, 0.2);
+}
+
+.datetime-select-btn:active {
+  transform: translateY(0);
+}
+
 .controls-section .refresh-btn {
   background: #0f2d66;
   border: none;

@@ -3,32 +3,39 @@
 import { useState, useEffect } from 'react'
 import '../styles/PreviousRecords.css'
 import { recordsAPI } from '../services/api'
+import DateTimeModal from '../components/DateTimeModal'
 
 export default function PreviousRecords() {
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedDate, setSelectedDate] = useState('2026-04-10')
+  const [selectedYear, setSelectedYear] = useState('2026')
+  const [selectedMonth, setSelectedMonth] = useState('04')
+  const [selectedDay, setSelectedDay] = useState('10')
+  const [selectedHour, setSelectedHour] = useState('00')
+  const [selectedMinute, setSelectedMinute] = useState('00')
   const [filteredRecords, setFilteredRecords] = useState([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // 초기 데이터 로드
   useEffect(() => {
     fetchRecords()
   }, [])
 
-  // 날짜 또는 검색 조건 변경 시 필터링
+  // 날짜/시간 또는 검색 조건 변경 시 필터링
   useEffect(() => {
     applyFilters()
-  }, [records, selectedDate, searchQuery])
+  }, [records, selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute, searchQuery])
 
   const fetchRecords = async () => {
     setLoading(true)
     setError(null)
     try {
       // 백엔드 API 호출 - 나중에 실제 엔드포인트로 변경
+      const dateTime = `${selectedYear}-${selectedMonth}-${selectedDay} ${selectedHour}:${selectedMinute}`
       const data = await recordsAPI.getRecords({
-        date: selectedDate,
+        dateTime: dateTime,
         limit: 100,
       })
       setRecords(data.records || Array(14).fill(null))
@@ -44,13 +51,14 @@ export default function PreviousRecords() {
   const applyFilters = () => {
     let filtered = records
 
-    // 날짜별 필터링
-    if (selectedDate) {
+    // 날짜/시간별 필터링
+    const selectedDateTime = `${selectedYear}-${selectedMonth}-${selectedDay} ${selectedHour}:${selectedMinute}`
+    if (selectedDateTime) {
       // 실제 백엔드에서는 이미 필터링되어 반환됨
       // 클라이언트 측 백업 필터링
       filtered = filtered.filter((record) => {
         if (!record) return true // null 데이터는 표시
-        return record.date === selectedDate
+        return record.dateTime === selectedDateTime
       })
     }
 
@@ -70,16 +78,28 @@ export default function PreviousRecords() {
     setFilteredRecords(filtered)
   }
 
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value)
-  }
-
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value)
   }
 
   const handleRefresh = () => {
     fetchRecords()
+  }
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleDateTimeConfirm = (dateTime) => {
+    setSelectedYear(dateTime.year)
+    setSelectedMonth(dateTime.month)
+    setSelectedDay(dateTime.day)
+    setSelectedHour(dateTime.hour)
+    setSelectedMinute(dateTime.minute)
   }
 
   return (
@@ -99,19 +119,32 @@ export default function PreviousRecords() {
           />
         </div>
 
-        <div className="date-picker-section">
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            className="date-display"
-          />
+        <div className="datetime-picker-section">
+          <button
+            className="datetime-select-btn"
+            onClick={handleOpenModal}
+          >
+            {selectedYear}년 {selectedMonth}월 {selectedDay}일 {selectedHour}시 {selectedMinute}분
+          </button>
         </div>
 
         <button className="refresh-btn" onClick={handleRefresh}>
           새로고침
         </button>
       </div>
+
+      <DateTimeModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleDateTimeConfirm}
+        initialDateTime={{
+          year: selectedYear,
+          month: selectedMonth,
+          day: selectedDay,
+          hour: selectedHour,
+          minute: selectedMinute
+        }}
+      />
 
       {error && (
         <div className="error-message">

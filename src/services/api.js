@@ -52,9 +52,10 @@ export const recordsAPI = {
 
   // 기록 조회 (필터 포함)
   getRecords: (options = {}) => {
-    const { date, search, page = 1, limit = 14 } = options
+    const { date, dateTime, search, page = 1, limit = 14 } = options
     const params = new URLSearchParams({
       ...(date && { date }),
+      ...(dateTime && { dateTime }),
       ...(search && { search }),
       page,
       limit,
