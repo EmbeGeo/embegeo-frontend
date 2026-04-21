@@ -37,7 +37,11 @@ export default function DataGrid() {
   }, [wsData])
 
   const timestamp = sensor?.timestamp
-    ? new Date(sensor.timestamp).toLocaleDateString('ko-KR')
+    ? new Date(sensor.timestamp).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
     : '-'
 
   return (
