@@ -11,26 +11,13 @@ import {
   Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { recordsAPI } from '../services/api'
+import { statisticsAPI } from '../services/api'
 import DateTimeModal from '../components/DateTimeModal'
 import '../styles/Graph.css'
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend)
 
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-
-function getMondayOfWeek(year, month, day) {
-  const date = new Date(`${year}-${month}-${day}`)
-  const dow = date.getDay()
-  const diff = dow === 0 ? -6 : 1 - dow
-  const monday = new Date(date)
-  monday.setDate(date.getDate() + diff)
-  return monday
-}
-
-function formatDate(date) {
-  return date.toISOString().split('T')[0]
-}
 
 function getTodayParts() {
   const now = new Date()
@@ -56,42 +43,25 @@ export default function Graph() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
-    if (selectedYear) {
-      fetchWeeklyData()
-    }
+    fetchWeeklyData()
   }, [selectedYear, selectedMonth, selectedDay])
 
   const fetchWeeklyData = async () => {
     setLoading(true)
     setError(null)
     try {
-      const monday = getMondayOfWeek(selectedYear, selectedMonth, selectedDay)
-      const counts = []
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(monday)
-        d.setDate(monday.getDate() + i)
-        const dateStr = formatDate(d)
-        try {
-          const data = await recordsAPI.getRecords({ date: dateStr, limit: 100 })
-          counts.push((data.records || []).length)
-        } catch {
-          counts.push(0)
-        }
-      }
-      setWeeklyCounts(counts)
+      const res = await statisticsAPI.getWeeklySummary()
+      const dailyData = res.data?.daily_data || []
+      // daily_data는 최근 7일 순서 (오래된 날부터) → MON~SUN 순서로 매핑
+      const counts = dailyData.map((d) => d.total_count)
+      // 7개 미만이면 앞을 0으로 채움
+      while (counts.length < 7) counts.unshift(0)
+      setWeeklyCounts(counts.slice(-7))
     } catch (err) {
       setError(err.message)
       setWeeklyCounts(Array(7).fill(0))
     }
     setLoading(false)
-  }
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true)
-  }
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
   }
 
   const handleDateTimeConfirm = (dateTime) => {
@@ -107,7 +77,7 @@ export default function Graph() {
     labels: DAY_LABELS,
     datasets: [
       {
-        label: '기록 수',
+        label: '생산 수',
         data: weeklyCounts,
         borderColor: '#3ecfcf',
         backgroundColor: 'transparent',
@@ -129,7 +99,7 @@ export default function Graph() {
       title: { display: false },
       tooltip: {
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y}건`,
+          label: (ctx) => ` ${ctx.parsed.y}개`,
         },
       },
     },
@@ -155,7 +125,7 @@ export default function Graph() {
           <h2>기록 그래프</h2>
         </div>
         <div className="header-actions">
-          <button className="search-open-btn" onClick={handleOpenModal}>
+          <button className="search-open-btn" onClick={() => setIsModalOpen(true)}>
             시간 조회
           </button>
           <button className="refresh-btn" onClick={fetchWeeklyData}>
@@ -167,7 +137,7 @@ export default function Graph() {
       {isModalOpen && (
         <DateTimeModal
           isOpen={isModalOpen}
-          onClose={handleCloseModal}
+          onClose={() => setIsModalOpen(false)}
           onConfirm={handleDateTimeConfirm}
           initialDateTime={{
             year: selectedYear,
@@ -180,9 +150,7 @@ export default function Graph() {
       )}
 
       {error && (
-        <div className="graph-error-message">
-          API 연결 중: {error}. 빈 데이터로 표시합니다.
-        </div>
+        <div className="graph-error-message">API 오류: {error}</div>
       )}
 
       <div className="chart-wrapper">
