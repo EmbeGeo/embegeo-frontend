@@ -27,6 +27,9 @@ export default function LiveCam() {
       <div className="camera-title">
         <img src={liveCamScreenImage} alt="Live Camera Icon" className="camera-icon-image" />
         <h2>Live Cam Screen</h2>
+        <span style={{ marginLeft: 8, fontSize: 12, color: connected ? '#3ecfcf' : '#aaa' }}>
+          {connected ? '● 연결됨' : '○ 연결 중...'}
+        </span>
       </div>
 
       <img
