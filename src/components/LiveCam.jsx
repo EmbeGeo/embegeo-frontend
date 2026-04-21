@@ -1,15 +1,26 @@
 /* src/components/LiveCam.jsx */
+
+import { useState, useEffect } from 'react'
 import './LiveCam.css'
 import liveCamScreenImage from '../assets/live_cam_screen.png'
-import useSensorSocket from '../hooks/useSensorSocket'
 
 export default function LiveCam() {
-  const { data, connected } = useSensorSocket()
+  const [timeDisplay, setTimeDisplay] = useState('')
+  const [frameDrops] = useState(0)
 
-  const timeStr = data?.timestamp
-    ? new Date(data.timestamp).toLocaleTimeString('ko-KR')
-    : '-'
-  const errorCount = data?.error_count ?? '-'
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date()
+      const month = String(now.getMonth() + 1).padStart(2, '0')
+      const day = String(now.getDate()).padStart(2, '0')
+      const minute = String(now.getMinutes()).padStart(2, '0')
+      setTimeDisplay(`${month}월 ${day}일 ${minute}분`)
+    }
+    
+    updateTime()
+    const timer = setInterval(updateTime, 60000) // 매 분마다 업데이트
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <div className="live-cam-section">
@@ -29,12 +40,16 @@ export default function LiveCam() {
 
       <div className="info-boxes">
         <div className="info-box">
-          <span className="info-label">Time</span>
-          <span className="info-value">{timeStr}</span>
+          <div className="info-content">
+            <span className="info-label">Time</span>
+            <span className="info-value">{timeDisplay}</span>
+          </div>
         </div>
         <div className="info-box">
-          <span className="info-label">Error Count</span>
-          <span className="info-value">{errorCount}</span>
+          <div className="info-content">
+            <span className="info-label">Frame Drops</span>
+            <span className="info-value">{frameDrops}</span>
+          </div>
         </div>
       </div>
     </div>

@@ -86,25 +86,25 @@ export default function DateTimeModal({ isOpen, onClose, onConfirm, initialDateT
               label="월"
               value={month}
               onChange={handleMonthChange}
-              options={['', '', ...Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '00')), '', '']}
+              options={['', '', ...Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')), '', '']}
             />
             <WheelPicker
               label="일"
               value={day}
               onChange={handleDayChange}
-              options={['', '', ...Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '00')), '', '']}
+              options={['', '', ...Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0')), '', '']}
             />
             <WheelPicker
               label="시"
               value={hour}
               onChange={handleHourChange}
-              options={['', '', ...Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '00')), '', '']}
+              options={['', '', ...Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')), '', '']}
             />
             <WheelPicker
               label="분"
               value={minute}
               onChange={handleMinuteChange}
-              options={['', '', ...Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '00')), '', '']}
+              options={['', '', ...Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')), '', '']}
             />
           </div>
 
@@ -165,28 +165,28 @@ function WheelPicker({ label, value, onChange, options }) {
 
   const scrollToIndex = (index, duration = 200) => {
     if (!containerRef.current) return
-
+    
     const itemHeight = 40
     const containerHeight = containerRef.current.clientHeight
     const scrollTop = index * itemHeight - (containerHeight / 2 - itemHeight / 2)
     const target = Math.max(0, scrollTop)
-
+    
     if (duration === 0) {
       containerRef.current.scrollTop = target
     } else {
       const current = containerRef.current.scrollTop
       const diff = target - current
       const startTime = Date.now()
-
+      
       const animate = () => {
         const elapsed = Date.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
-        const easeProgress = progress < 0.5
-          ? 2 * progress * progress
+        const easeProgress = progress < 0.5 
+          ? 2 * progress * progress 
           : -1 + (4 - 2 * progress) * progress
-
+        
         containerRef.current.scrollTop = current + diff * easeProgress
-
+        
         if (progress < 1) requestAnimationFrame(animate)
       }
       animate()
@@ -199,7 +199,11 @@ function WheelPicker({ label, value, onChange, options }) {
     const itemHeight = 40
     const containerHeight = containerRef.current.clientHeight
     const scrollTop = containerRef.current.scrollTop
+    // 아이템 중앙 기준으로 인덱스 계산 (itemHeight/2 보정)
     const rawIndex = Math.round((scrollTop + containerHeight / 2 - itemHeight / 2) / itemHeight)
+
+    // 앞뒤 빈칸(2개씩)을 고려한 실제 데이터 인덱스 계산
+    // 실제 데이터 범위: 2 ~ (options.length - 3)
     const dataIndex = Math.max(2, Math.min(options.length - 3, rawIndex))
 
     if (dataIndex !== selectedIndex && options[dataIndex] !== '') {
@@ -219,10 +223,10 @@ function WheelPicker({ label, value, onChange, options }) {
 
     const currentY = e.clientY || e.touches?.[0]?.clientY
     const deltaY = currentY - lastYRef.current
-
+    
     velocityRef.current = deltaY
     lastYRef.current = currentY
-
+    
     containerRef.current.scrollTop -= deltaY
   }
 
@@ -232,7 +236,11 @@ function WheelPicker({ label, value, onChange, options }) {
     const itemHeight = 40
     const containerHeight = containerRef.current.clientHeight
     const scrollTop = containerRef.current.scrollTop
+    // 아이템 중앙 기준으로 인덱스 계산 (itemHeight/2 보정)
     const rawIndex = Math.round((scrollTop + containerHeight / 2 - itemHeight / 2) / itemHeight)
+
+    // 앞뒤 빈칸(2개씩)을 고려한 실제 데이터 인덱스 계산
+    // 실제 데이터 범위: 2 ~ (options.length - 3)
     const dataIndex = Math.max(2, Math.min(options.length - 3, rawIndex))
 
     if (options[dataIndex] !== '') {
@@ -244,13 +252,14 @@ function WheelPicker({ label, value, onChange, options }) {
 
   const handleMouseUp = () => {
     setIsDragging(false)
-
+    
     if (!containerRef.current) return
-
+    
+    // 모멘텀 스크롤
     if (Math.abs(velocityRef.current) > 2) {
       let velocity = velocityRef.current
       const friction = 0.95
-
+      
       const momentum = () => {
         if (Math.abs(velocity) > 0.5) {
           containerRef.current.scrollTop -= velocity
@@ -267,6 +276,7 @@ function WheelPicker({ label, value, onChange, options }) {
   }
 
   const handleItemClick = (index) => {
+    // 클릭한 항목이 빈칸이 아니면 선택
     if (options[index] !== '') {
       setSelectedIndex(index)
       onChange(options[index])

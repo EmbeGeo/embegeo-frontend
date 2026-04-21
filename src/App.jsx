@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Home from './pages/Home'
 import PreviousRecords from './pages/PreviousRecords'
-import Graph from './pages/Graph'
 
 function App() {
   return (
@@ -16,7 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/records" element={<PreviousRecords />} />
-            <Route path="/graph" element={<Graph />} />
+            <Route path="/graph" element={<div style={{ padding: '20px' }}>Graph 페이지 (개발 중)</div>} />
           </Routes>
         </div>
       </div>

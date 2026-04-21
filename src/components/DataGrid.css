@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
+  flex: 1;
   min-height: 0;
 }
 
@@ -36,22 +36,24 @@
 }
 
 .grid-container {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   flex: 1;
   min-height: 0;
+  align-content: stretch;
 }
 
 .grid-item {
   background: white;
   border: 3px solid #0f2d66;
   border-radius: 12px;
-  min-height: 48px;
+  flex: 1 1 calc(50% - 5px);
+  min-height: 0;
 }
 
 @media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: 1fr;
+  .grid-item {
+    flex: 1 1 100%;
   }
 }

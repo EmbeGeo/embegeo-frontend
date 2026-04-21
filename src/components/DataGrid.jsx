@@ -1,7 +1,6 @@
 /* src/components/DataGrid.jsx */
-import { useEffect, useState } from 'react'
-import { sensorAPI } from '../services/api'
-import useSensorSocket from '../hooks/useSensorSocket'
+
+import { useState, useEffect } from 'react'
 import './DataGrid.css'
 
 const SENSOR_LABELS = [
@@ -22,23 +21,16 @@ const SENSOR_LABELS = [
 ]
 
 export default function DataGrid() {
-  const [sensor, setSensor] = useState(null)
-  const { data: wsData } = useSensorSocket()
+  const data = Array(14).fill(null)
+  const [currentDate, setCurrentDate] = useState('')
 
   useEffect(() => {
-    sensorAPI.getLatest()
-      .then((res) => setSensor(res.data))
-      .catch(() => {})
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    setCurrentDate(`${year}년 ${month}월 ${day}일`)
   }, [])
-
-  // WebSocket으로 실시간 데이터 수신 시 업데이트
-  useEffect(() => {
-    if (wsData) setSensor(wsData)
-  }, [wsData])
-
-  const timestamp = sensor?.timestamp
-    ? new Date(sensor.timestamp).toLocaleDateString('ko-KR')
-    : '-'
 
   return (
     <div className="data-grid-section">
@@ -47,7 +39,7 @@ export default function DataGrid() {
       </div>
 
       <div className="date-display">
-        <span>{timestamp}</span>
+        <span>{currentDate}</span>
       </div>
 
       <div className="grid-container">
