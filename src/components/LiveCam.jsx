@@ -16,9 +16,6 @@ export default function LiveCam() {
       <div className="camera-title">
         <img src={liveCamScreenImage} alt="Live Camera Icon" className="camera-icon-image" />
         <h2>Live Cam Screen</h2>
-        <span style={{ marginLeft: 8, fontSize: 12, color: connected ? '#3ecfcf' : '#aaa' }}>
-          {connected ? '● 연결됨' : '○ 연결 중...'}
-        </span>
       </div>
 
       <img
@@ -30,11 +27,13 @@ export default function LiveCam() {
       <div className="info-boxes">
         <div className="info-box">
           <span className="info-label">Time</span>
-          <span className="info-value">{timeStr}</span>
+          <span className="info-value" style={{ alignSelf: 'center' }}>{timeStr}</span>
         </div>
         <div className="info-box">
-          <span className="info-label">Error Count</span>
-          <span className="info-value">{errorCount}</span>
+          <span className="info-label">Connection</span>
+          <span className="info-value" style={{ color: connected ? '#16a34a' : '#dc2626', fontSize: 18, alignSelf: 'center' }}>
+            {connected ? '● 연결됨' : '○ 연결 끊김'}
+          </span>
         </div>
       </div>
     </div>
