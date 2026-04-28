@@ -4,71 +4,100 @@ import { useState, useEffect } from 'react'
 import '../styles/PreviousRecords.css'
 import { sensorAPI } from '../services/api'
 import DateTimeModal from '../components/DateTimeModal'
+import useSensorSocket from '../hooks/useSensorSocket'
+
+const SENSOR_LABELS = [
+  { key: 'iso_temp_pv',       label: 'ISO 온도 PV',     unit: '°C'  },
+  { key: 'iso_temp_sv',       label: 'ISO 온도 SV',     unit: '°C'  },
+  { key: 'iso_pump_speed',    label: 'ISO 펌프 속도',   unit: 'rpm' },
+  { key: 'iso_press',         label: 'ISO 압력',        unit: 'bar' },
+  { key: 'pol1_temp_pv',      label: 'POL1 온도 PV',   unit: '°C'  },
+  { key: 'pol1_temp_sv',      label: 'POL1 온도 SV',   unit: '°C'  },
+  { key: 'pol1_pump_speed',   label: 'POL1 펌프 속도',  unit: 'rpm' },
+  { key: 'pol1_press',        label: 'POL1 압력',       unit: 'bar' },
+  { key: 'pol2_temp_pv',      label: 'POL2 온도 PV',   unit: '°C'  },
+  { key: 'pol2_temp_sv',      label: 'POL2 온도 SV',   unit: '°C'  },
+  { key: 'pol2_pump_speed',   label: 'POL2 펌프 속도',  unit: 'rpm' },
+  { key: 'pol2_press',        label: 'POL2 압력',       unit: 'bar' },
+  { key: 'hot_water_temp_pv', label: '온수 온도 PV',    unit: '°C'  },
+  { key: 'hot_water_temp_sv', label: '온수 온도 SV',    unit: '°C'  },
+]
 
 export default function PreviousRecords() {
-  const [selectedYear, setSelectedYear] = useState('')
-  const [selectedMonth, setSelectedMonth] = useState('')
-  const [selectedDay, setSelectedDay] = useState('')
-  const [selectedHour, setSelectedHour] = useState('')
-  const [selectedMinute, setSelectedMinute] = useState('')
-  const [records, setRecords] = useState([])
+  const [sensor, setSensor] = useState(null)
+  const [isRealtime, setIsRealtime] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedDateTime, setSelectedDateTime] = useState(null)
+
+  const { data: wsData } = useSensorSocket()
 
   useEffect(() => {
-    const now = new Date()
-    setSelectedYear(now.getFullYear().toString())
-    setSelectedMonth((now.getMonth() + 1).toString().padStart(2, '0'))
-    setSelectedDay(now.getDate().toString().padStart(2, '0'))
-    setSelectedHour(now.getHours().toString().padStart(2, '0'))
-    setSelectedMinute(now.getMinutes().toString().padStart(2, '0'))
+    sensorAPI.getLatest()
+      .then((res) => setSensor(res.data))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
-    if (selectedYear) fetchRecords()
-  }, [selectedYear, selectedMonth, selectedDay, selectedHour, selectedMinute])
+    if (isRealtime && wsData) setSensor(wsData)
+  }, [wsData, isRealtime])
 
-  const fetchRecords = async () => {
+  const handleDateTimeConfirm = async (dateTime) => {
+    setIsModalOpen(false)
+    setIsRealtime(false)
+    setSelectedDateTime(dateTime)
+
     setLoading(true)
     setError(null)
     try {
-      // 선택한 시각 기준으로 앞 1시간 범위 조회
-      const endTime = `${selectedYear}-${selectedMonth}-${selectedDay}T${selectedHour}:${selectedMinute}:00`
+      const endTime = `${dateTime.year}-${dateTime.month}-${dateTime.day}T${dateTime.hour}:${dateTime.minute}:59`
       const endDate = new Date(endTime)
-      const startDate = new Date(endDate.getTime() - 60 * 60 * 1000)
+      const startDate = new Date(endDate.getTime() - 60 * 1000)
       const startTime = startDate.toISOString().slice(0, 19)
 
-      const res = await sensorAPI.getRange(startTime, endTime, 100)
-      setRecords(res.data?.data || [])
+      const res = await sensorAPI.getRange(startTime, endTime, 50)
+      const records = res.data?.data || []
+      if (records.length > 0) {
+        setSensor(records[records.length - 1])
+      } else {
+        setSensor(null)
+        setError('해당 시간에 데이터가 없습니다')
+      }
     } catch (err) {
-      console.error('Failed to fetch records:', err)
       setError(err.message)
-      setRecords([])
     }
     setLoading(false)
   }
 
-  const handleRefresh = () => fetchRecords()
-
-  const handleOpenModal = () => {
-    const now = new Date()
-    setSelectedYear(now.getFullYear().toString())
-    setSelectedMonth((now.getMonth() + 1).toString().padStart(2, '0'))
-    setSelectedDay(now.getDate().toString().padStart(2, '0'))
-    setSelectedHour(now.getHours().toString().padStart(2, '0'))
-    setSelectedMinute(now.getMinutes().toString().padStart(2, '0'))
-    setIsModalOpen(true)
+  const handleRefresh = () => {
+    if (isRealtime) {
+      sensorAPI.getLatest()
+        .then((res) => setSensor(res.data))
+        .catch(() => {})
+    } else if (selectedDateTime) {
+      handleDateTimeConfirm(selectedDateTime)
+    }
   }
 
-  const handleDateTimeConfirm = (dateTime) => {
-    setSelectedYear(dateTime.year)
-    setSelectedMonth(dateTime.month)
-    setSelectedDay(dateTime.day)
-    setSelectedHour(dateTime.hour)
-    setSelectedMinute(dateTime.minute)
-    setIsModalOpen(false)
+  const handleRealtimeMode = () => {
+    setIsRealtime(true)
+    setSelectedDateTime(null)
+    setError(null)
+    sensorAPI.getLatest()
+      .then((res) => setSensor(res.data))
+      .catch(() => {})
   }
+
+  const timestamp = sensor?.recorded_at
+    ? new Date(sensor.recorded_at).toLocaleString('ko-KR')
+    : '-'
+
+  const timeLabel = isRealtime
+    ? `실시간 | ${timestamp}`
+    : selectedDateTime
+      ? `${selectedDateTime.year}.${selectedDateTime.month}.${selectedDateTime.day} ${selectedDateTime.hour}:${selectedDateTime.minute} 조회`
+      : timestamp
 
   return (
     <main className="previous-records-container">
@@ -78,15 +107,15 @@ export default function PreviousRecords() {
             <h2>이전 기록</h2>
           </div>
           <div className="header-actions">
-            {selectedYear && (
-              <span className="selected-time-label">
-                {selectedYear}.{selectedMonth}.{selectedDay}&nbsp;
-                {selectedHour}:{selectedMinute} 기준 &nbsp;(앞 1시간)
-              </span>
-            )}
-            <button className="search-open-btn" onClick={handleOpenModal}>
+            <span className="selected-time-label">{timeLabel}</span>
+            <button className="search-open-btn" onClick={() => setIsModalOpen(true)}>
               시간 조회
             </button>
+            {!isRealtime && (
+              <button className="refresh-btn" onClick={handleRealtimeMode}>
+                실시간
+              </button>
+            )}
             <button className="refresh-btn" onClick={handleRefresh}>
               새로고침
             </button>
@@ -99,41 +128,25 @@ export default function PreviousRecords() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onConfirm={handleDateTimeConfirm}
-          initialDateTime={{
-            year: selectedYear,
-            month: selectedMonth,
-            day: selectedDay,
-            hour: selectedHour,
-            minute: selectedMinute,
-          }}
         />
       )}
 
-      {error && (
-        <div className="error-message">API 오류: {error}</div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
-      <div className="records-grid">
-        {loading ? (
-          <div className="loading-message">로딩 중...</div>
-        ) : records.length > 0 ? (
-          records.map((record, index) => (
-            <div key={record.id ?? index} className="record-item">
-              <div className="record-title">
-                {new Date(record.recorded_at).toLocaleString('ko-KR')}
-              </div>
-              <div className="record-details">
-                ISO: {record.iso_temp_pv ?? '-'}°C &nbsp;|&nbsp;
-                POL1: {record.pol1_temp_pv ?? '-'}°C &nbsp;|&nbsp;
-                POL2: {record.pol2_temp_pv ?? '-'}°C &nbsp;|&nbsp;
-                온수: {record.hot_water_temp_pv ?? '-'}°C
-              </div>
+      {loading ? (
+        <div className="db-loading">로딩 중...</div>
+      ) : (
+        <div className="db-sensor-grid">
+          {SENSOR_LABELS.map(({ key, label, unit }) => (
+            <div key={key} className="db-sensor-item">
+              <span className="db-sensor-label">{label}</span>
+              <span className="db-sensor-value">
+                {sensor != null ? (sensor[key] != null ? `${sensor[key]} ${unit}` : `- ${unit}`) : '-'}
+              </span>
             </div>
-          ))
-        ) : (
-          <div className="no-records-message">기록이 없습니다</div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </main>
   )
 }
