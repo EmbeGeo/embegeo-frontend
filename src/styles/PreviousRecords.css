@@ -9,6 +9,12 @@
   min-height: 0;
 }
 
+.records-header-box {
+  background: #c8ddf0;
+  border-radius: 16px;
+  padding: 16px 20px;
+}
+
 .records-header-row {
   display: flex;
   align-items: center;
@@ -24,6 +30,16 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.selected-time-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f2d66;
+  background: #dce9f9;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .search-slider-box {

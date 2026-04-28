@@ -72,17 +72,25 @@ export default function PreviousRecords() {
 
   return (
     <main className="previous-records-container">
-      <div className="records-header-row">
-        <div className="records-header">
-          <h2>이전 기록</h2>
-        </div>
-        <div className="header-actions">
-          <button className="search-open-btn" onClick={handleOpenModal}>
-            시간 조회
-          </button>
-          <button className="refresh-btn" onClick={handleRefresh}>
-            새로고침
-          </button>
+      <div className="records-header-box">
+        <div className="records-header-row">
+          <div className="records-header">
+            <h2>이전 기록</h2>
+          </div>
+          <div className="header-actions">
+            {selectedYear && (
+              <span className="selected-time-label">
+                {selectedYear}.{selectedMonth}.{selectedDay}&nbsp;
+                {selectedHour}:{selectedMinute} 기준 &nbsp;(앞 1시간)
+              </span>
+            )}
+            <button className="search-open-btn" onClick={handleOpenModal}>
+              시간 조회
+            </button>
+            <button className="refresh-btn" onClick={handleRefresh}>
+              새로고침
+            </button>
+          </div>
         </div>
       </div>
 
@@ -112,10 +120,13 @@ export default function PreviousRecords() {
           records.map((record, index) => (
             <div key={record.id ?? index} className="record-item">
               <div className="record-title">
-                {new Date(record.timestamp).toLocaleString('ko-KR')}
+                {new Date(record.recorded_at).toLocaleString('ko-KR')}
               </div>
               <div className="record-details">
-                총 생산: {record.total_count}개 / 오류: {record.error_count}개
+                ISO: {record.iso_temp_pv ?? '-'}°C &nbsp;|&nbsp;
+                POL1: {record.pol1_temp_pv ?? '-'}°C &nbsp;|&nbsp;
+                POL2: {record.pol2_temp_pv ?? '-'}°C &nbsp;|&nbsp;
+                온수: {record.hot_water_temp_pv ?? '-'}°C
               </div>
             </div>
           ))
