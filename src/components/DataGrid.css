@@ -48,6 +48,24 @@
   border: 3px solid #0f2d66;
   border-radius: 12px;
   min-height: 48px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.grid-item-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f2d66;
+  white-space: nowrap;
+}
+
+.grid-item-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: #111;
 }
 
 @media (max-width: 768px) {
